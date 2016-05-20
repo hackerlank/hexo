@@ -1,0 +1,318 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Swift LOG 输出 | Ieggs</title>
+  <meta name="author" content="huhuegg">
+  
+  <meta name="description" content="移动开发记录博客">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="Swift LOG 输出"/>
+  <meta property="og:site_name" content="Ieggs"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/favicon.ico" rel="shortcut icon">
+  <link rel="alternate" href="/atom.xml" title="Ieggs" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/font-awesome.min.css" type="text/css">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  
+  <script src="//ajax.aspnetcdn.com/ajax/jQuery/jquery-2.1.4.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+
+<script src="/js/dist/xlsx.core.min.js"></script>
+
+  
+
+</head>
+
+
+<body>
+  <header id="header" class="inner"><div id="nav-top">
+  <div class="alignleft main-title">
+    <h1>Ieggs</h1>
+    <h2>huhuegg 的个人博客</h2>
+  </div>
+  <nav id="main-nav" class="alignright">
+    <ul>
+      
+        <li><a href="/">首页</a></li>
+      
+        <li><a href="/archives">归档</a></li>
+      
+    </ul>
+    <div class="clearfix"></div>
+  </nav>
+  <div class="clearfix"></div>
+</div></header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper"><article class="post">
+  
+  <div class="post-content">
+    <header>
+      
+      <div class="alignright">
+        <a id="/2016/04/11/Swift-LOG-输出/" class="pageviews"></a>
+      </div>
+      
+        <div class="icon"></div>
+        <time datetime="2016-04-11T03:29:38.000Z"><a href="/2016/04/11/Swift-LOG-输出/">2016-04-11</a></time>
+      
+      
+  
+    <h1 class="title">Swift LOG 输出</h1>
+  
+
+      
+    </header>
+    <div class="entry">
+      
+        
+          
+        
+        <p>Log 输出是程序开发中很重要的组成部分，虽然它并不是直接的业务代码，但是却可以忠实地反映我们的程序是如何工作的，以及记录程序运行的过程中发生了什么。</p>
+<p>在 Swift 中，最简单的输出方法就是使用 <code>print</code>，在我们关心的地方输出字符串和值。但是这并不够，试想一下当程序变得非常复杂的时候，我们可能会输出很多内容，而想在其中寻找到我们希望的输出其实并不容易。我们往往需要更好更精确的输出，这包括输出这个 log 的文件，调用的行号以及所处的方法名字等等。</p>
+<p>我们当然可以在 <code>print</code> 的时候将当前的文件名字和那些必要的信息作为参数同我们的消息一起进行打印：</p>
+<figure class="highlight oxygene"><table><tr><td class="code"><pre><span class="line"><span class="comment">// Test.swift</span></span><br><span class="line">func <span class="function"><span class="keyword">method</span><span class="params">()</span> <span class="comment">&#123;</span><br><span class="line">    //...</span><br><span class="line">    print("文件名:Test.swift, 方法名:method，这是一条输出")</span><br><span class="line">    //...</span><br><span class="line">&#125;</span></span></span><br></pre></td></tr></table></figure>
+<p>但是这显然非常麻烦，每次输入文件名和方法名不说，随着代码的改变，这些 Log 的位置也可能发生改变，这时我们可能还需要不断地去维护这些输出，代价实在太大。</p>
+<p>在 Swift 中，编译器为我们准备了几个很有用的编译符号，用来处理类似这样的需求，它们分别是：</p>
+<p>符号类型描述<strong>FILE</strong>String包含这个符号的文件的路径<strong>LINE</strong>Int符号出现处的行号<strong>COLUMN</strong>Int符号出现处的列<strong>FUNCTION</strong>String包含这个符号的方法名字</p>
+<p>因此，我们可以通过使用这些符号来写一个好一些的 Log 输出方法：</p>
+<figure class="highlight taggerscript"><table><tr><td class="code"><pre><span class="line">func printLog<span class="symbol">\&lt;</span>T<span class="symbol">\&gt;</span>(message: T,</span><br><span class="line">                    file: String = <span class="symbol">\_</span><span class="symbol">\_</span>FILE<span class="symbol">\_</span><span class="symbol">\_</span>,</span><br><span class="line">                  method: String = <span class="symbol">\_</span><span class="symbol">\_</span>FUNCTION<span class="symbol">\_</span><span class="symbol">\_</span>,</span><br><span class="line">                    line: Int = <span class="symbol">\_</span><span class="symbol">\_</span>LINE<span class="symbol">\_</span><span class="symbol">\_</span>)</span><br><span class="line">&#123;</span><br><span class="line">    print("<span class="symbol">\\</span>((file as NSString).lastPathComponent)[<span class="symbol">\\</span>(line)], <span class="symbol">\\</span>(method): <span class="symbol">\\</span>(message)")</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这样，在进行 log 的时候我们只需要使用这个方法就能完成文件名，行号以及方法名的输出了。最棒的是，我们不再需要对这样的输出进行维护，无论在哪里它都能正确地输出各个参数：</p>
+<figure class="highlight oxygene"><table><tr><td class="code"><pre><span class="line"><span class="comment">// Test.swift</span></span><br><span class="line">func <span class="function"><span class="keyword">method</span><span class="params">()</span> <span class="comment">&#123;</span><br><span class="line">    //...</span><br><span class="line">    printLog("这是一条输出")</span><br><span class="line">    //...</span><br><span class="line">&#125;</span></span><br><span class="line"></span><br><span class="line">// 输出：</span><br><span class="line">// <span class="title">Test</span>.<span class="title">swift</span>[62], <span class="title">method</span><span class="params">()</span>:</span> 这是一条输出</span><br></pre></td></tr></table></figure>
+<p>另外，对于 log 输出更多地其实是用在程序开发和调试的过程中的，过多的输出有可能对运行的性能造成影响。在 Release 版本中关闭掉向控制台的输出也是软件开发中一种常见的做法。如果我们在开发中就注意使用了统一的 log 输出的话，这就变得非常简单了。使用<a href="http://swifter.tips/condition-compile/" target="_blank" rel="external">条件编译</a>的方法，我们可以添加条件，并设置合适的编译配置，使 <code>printLog</code> 的内容在 Release 时被去掉，从而成为一个空方法：</p>
+<figure class="highlight taggerscript"><table><tr><td class="code"><pre><span class="line">func printLog<span class="symbol">\&lt;</span>T<span class="symbol">\&gt;</span>(message: T,</span><br><span class="line">                    file: String = <span class="symbol">\_</span><span class="symbol">\_</span>FILE<span class="symbol">\_</span><span class="symbol">\_</span>,</span><br><span class="line">                  method: String = <span class="symbol">\_</span><span class="symbol">\_</span>FUNCTION<span class="symbol">\_</span><span class="symbol">\_</span>,</span><br><span class="line">                    line: Int = <span class="symbol">\_</span><span class="symbol">\_</span>LINE<span class="symbol">\_</span><span class="symbol">\_</span>)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="symbol">\#</span>if DEBUG</span><br><span class="line">    print("<span class="symbol">\\</span>((file as NSString).lastPathComponent)[<span class="symbol">\\</span>(line)], <span class="symbol">\\</span>(method): <span class="symbol">\\</span>(message)")</span><br><span class="line">    <span class="symbol">\#</span>endif</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>新版本的 LLVM 编译器在遇到这个空方法时，甚至会直接将这个方法整个去掉，完全不去调用它，从而实现零成本。</p>
+
+      
+    </div>
+    <footer>
+      
+      
+      
+        <div class="alignright share-box">
+  
+</div>
+      
+      <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+
+
+
+<!-- 多说评论框 start -->
+    <div class="ds-thread" data-thread-key="/2016/04/11/Swift-LOG-输出/" data-title="Swift LOG 输出" data-url="http://www.ieggs.info/2016/04/11/Swift-LOG-输出/"></div>
+<!-- 多说评论框 end -->
+<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"huhuegg"};
+    (function() {
+        var ds = document.createElement('script');
+        ds.type = 'text/javascript';ds.async = true;
+        ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+        ds.charset = 'UTF-8';
+        (document.getElementsByTagName('head')[0]
+         || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+    </script>
+<!-- 多说公共JS代码 end -->
+
+
+
+
+  <script type="text/javascript">
+  var views = sessionStorage.getItem('/2016/04/11/Swift-LOG-输出/');
+  console.log(views)
+  if (views != null) {
+    var post = document.getElementById('/2016/04/11/Swift-LOG-输出/');
+    post.innerHTML = views;
+    post.style.display = "inline";
+  } else {
+    var flag = sessionStorage.getItem('http://www.ieggs.info' + "/pageviews/" + '0');
+if (flag == "yes"){
+  var paths = null
+  $.each(paths, function(index, path){
+    var post = document.getElementById(path);
+    var views = sessionStorage.getItem(path);
+    if (views != null) {
+      post.innerHTML = views;
+      post.style.display = "inline";
+    }
+  });
+} else if (flag == null){
+  if(typeof require !== 'undefined') XLSX = require('xlsx');
+
+  var url = "https://docs.google.com/spreadsheets/d/" + 'null' + "/export";
+  var oReq = new XMLHttpRequest();
+  oReq.open("GET", url, true);
+  oReq.responseType = "arraybuffer";
+
+  oReq.onload = function(e) {
+    var arraybuffer = oReq.response;
+
+    /* convert data to binary string */
+    var data = new Uint8Array(arraybuffer);
+	var arr = new Array();
+	for(var i = 0; i != data.length; ++i) arr[i] = String.fromCharCode(data[i]);
+	var bstr = arr.join("");
+
+	/* Call XLSX */
+	var workbook = XLSX.read(bstr, {type:"binary"});
+
+    /* DO SOMETHING WITH workbook HERE */
+	var json = to_json(workbook);
+
+	$.each(json., function(index, item){
+  if(item. == '/2016/04/11/Swift-LOG-输出/'){
+    var post = document.getElementById(item.);
+    post.innerHTML = item.undefined;
+    post.style.display = "inline";
+    sessionStorage.setItem(item., item.undefined);
+  }
+})
+  }
+
+  oReq.send();
+}
+
+function to_json(workbook) {
+  var result = {};
+  workbook.SheetNames.forEach(function(sheetName) {
+	var roa = XLSX.utils.sheet_to_row_object_array(workbook.Sheets[sheetName]);
+      if(roa.length > 0){
+		result[sheetName] = roa;
+	  }
+  });
+  return result;
+}
+  }
+</script>
+
+</div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  
+    <form action="//google.com/search" method="get" accept-charset="utf-8">
+      <input type="search" name="q" results="0" placeholder="搜索">
+      <input type="hidden" name="q" value="site:www.ieggs.info">
+    </form>
+  
+</div>
+
+  
+<div class="widget tag">
+  <h3 class="title">最新文章</h3>
+  <ul class="entry">
+    
+      <li>
+        <a href="/2016/05/18/iOS应用安装失败原因排查/">iOS应用安装失败原因排查</a>
+      </li>
+    
+      <li>
+        <a href="/2016/04/11/Swift-LOG-输出/">Swift LOG 输出</a>
+      </li>
+    
+  </ul>
+</div>
+
+
+  
+
+  
+<div class="widget tagcloud">
+  <h3 class="title">标签云</h3>
+  <div class="entry">
+    <a href="/tags/inHouse/" style="font-size: 10px;">inHouse</a> <a href="/tags/ios9/" style="font-size: 10px;">ios9</a>
+  </div>
+</div>
+
+
+
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer" class="inner"><div id="foot-nav">
+  <ul class="social">
+    
+      <li><a class="github" href="https://github.com/huhuegg" title="github">github</a></li>
+    
+      <li><a class="rss" href="/atom.xml" title="rss">rss</a></li>
+    
+  </ul>
+</div>
+<div>
+  
+    &copy; 2016 huhuegg
+  
+</div>
+<div class="clearfix"></div></footer>
+  
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+<script type="text/javascript">
+  function navbar() {
+    var top = $('#nav-top').innerHeight();
+    $('#header').css('min-height', top);
+  }
+  navbar();
+  $(window).resize(navbar);
+</script>
+<div id="totop" class="footer-btn to-top">
+  <a title="返回顶部"></a>
+</div>
+
+<script type="text/javascript">
+  $(function(){ 
+	// When to show the scroll link
+	// higher number = scroll link appears further down the page   
+	var upperLimit = 800;
+	
+	// Our scroll link element
+	var scrollElem = $('#totop');
+   
+	// Scroll to top speed
+	var scrollSpeed = 500;
+   
+	// Show and hide the scroll to top link based on scroll position   
+	scrollElem.hide();
+	$(window).scroll(function () {            
+		var scrollTop = $(document).scrollTop();       
+		if ( scrollTop > upperLimit ) {
+		  $(scrollElem).stop().fadeTo(300, 1); // fade back in
+		  $(scrollElem).animate({bottom: "58px"}, { queue: false, duration: 10 });
+		} else {
+		  $(scrollElem).stop().fadeTo(300, 0); // fade out
+	      $(scrollElem).animate({bottom: "-200px"}, { queue: false, duration: 10 });
+			
+		}
+	});
+
+	// Scroll to top animation on click
+	$(scrollElem).click(function(){
+	  $('html, body').animate({scrollTop:0}, scrollSpeed);
+	  $(scrollElem).animate({bottom: "-200px"}, { queue: false, duration: 10 });
+	  return false;
+	});
+  });
+</script>
+</body>
+</html>
